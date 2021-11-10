@@ -1,0 +1,25 @@
+---
+
+- name: install restic
+  ansible.builtin.package:
+    state: present
+    name: restic
+
+- name: set permissions /usr/bin/restic
+  ansible.builtin.file:
+    path: /usr/bin/restic
+    mode: 0750
+    owner: root
+    group: harpocrates
+
+- name: getcap /usr/bin/restic
+  ansible.builtin.command: getcap /usr/bin/restic
+  changed_when: no
+  register: getcap_restic
+
+- name: setcap cap_dac_read_search=+ep /usr/bin/restic
+  community.general.capabilities:
+    path: /usr/bin/restic
+    capability: cap_dac_read_search=+ep
+    state: present
+  when: getcap_restic.stdout[-3:] != "+ep"

@@ -1,0 +1,6 @@
+---
+
+- name: initialize repository
+  become_user: harpocrates
+  ansible.builtin.shell: "eval export `crontab -l`; /usr/bin/restic --no-cache init"
+  when: repository_status.rc != 0

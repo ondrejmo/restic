@@ -1,0 +1,21 @@
+---
+  
+galaxy_info:
+  role_name: restic
+  author: Ondrej Molik
+  description: https://github.com/restic/restic
+  company: infrastructure
+  license: GLWTPL
+  min_ansible_version: 2.10
+
+  galaxy_tags: []
+
+  platforms:
+    - name: Ubuntu
+      versions:
+        - focal
+    - name: Debian
+      versions:
+        - buster
+
+dependencies: []

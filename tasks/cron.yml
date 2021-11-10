@@ -1,0 +1,42 @@
+---
+
+- name: store config vars
+  no_log: yes
+  ansible.builtin.cron:
+    name: "{{ item.name }}"
+    user: harpocrates
+    env: yes
+    job: "{{ item.value }}"
+  loop:
+    - name: RESTIC_PASSWORD
+      value: "{{ restic_pass }}"
+    - name: RESTIC_REPOSITORY
+      value: "{{ restic_repo }}"
+    - name: AWS_ACCESS_KEY_ID
+      value: "{{ restic_s3_access_key }}"
+    - name: AWS_SECRET_ACCESS_KEY
+      value: "{{ restic_s3_secret_key }}"
+    - name: RANDOM_DELAY
+      value: "5"
+
+- name: add repo config source
+  ansible.builtin.blockinfile:
+    path: /home/harpocrates/.bashrc
+    create: yes
+    mode: 0644
+    owner: harpocrates
+    group: harpocrates
+    block: |
+      # get credentials from crontab
+      eval export `crontab -l`
+      # prevent cache create by typos
+      alias restic="restic --no-cache"
+
+- name: add backup cronjobs
+  ansible.builtin.cron:
+    name: "restic backup {{ item }}"
+    job: "/usr/bin/restic --no-cache backup {{ item }} | logger -t 'restic_backup {{ item }}'"
+    user: harpocrates
+    minute: "0"
+    hour: "2"
+  loop: "{{ restic_items }}"
